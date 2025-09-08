@@ -4,18 +4,22 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Sistema de Reservas · Cabañas</title>
+
     <!-- Tailwind por CDN (suficiente para prototipo) -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- React 18 por CDN -->
+
+    <!-- React 18 y ReactDOM 18 por CDN (UMD) -->
     <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
+
     <!-- Babel para transpilar JSX en el navegador -->
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
   </head>
+
   <body class="bg-slate-50">
     <div id="root"></div>
 
-    <!-- Tu app en JSX (cargada desde /src/app.jsx) -->
+    <!-- Carga tu app JSX desde /src/app.jsx -->
     <script type="text/babel" data-presets="react" src="src/app.jsx"></script>
   </body>
 </html>
