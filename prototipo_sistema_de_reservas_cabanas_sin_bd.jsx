@@ -1,4 +1,5 @@
-import React, { useEffect, useMemo, useState } from "react";
+// Tomar hooks desde React global (CDN)
+const { useEffect, useMemo, useState } = React;
 
 /**
  * Prototipo de página para reservas (sin base de datos)
@@ -10,7 +11,7 @@ import React, { useEffect, useMemo, useState } from "react";
  * - Botón para limpiar datos locales
  *
  * Notas:
- * - No usa librerías externas, solo React + Tailwind (estilos)
+ * - No usa librerías externas, solo React + Tailwind (estilos por CDN)
  * - Todo se guarda en localStorage para que persista entre recargas
  */
 
@@ -34,19 +35,12 @@ const toKey = (d) => {
   const day = String(d.getDate()).padStart(2, "0");
   return `${y}-${m}-${day}`;
 };
-const fromKey = (s) => {
-  const [y, m, d] = s.split("-").map(Number);
-  return startOfDay(new Date(y, m - 1, d));
-};
-const range = (n, offset = 0) => Array.from({ length: n }, (_, i) => i + offset);
-
 const dateRange = (start, end) => {
   if (!start || !end || end <= start) return [];
   const out = [];
   for (let d = startOfDay(start); d < end; d = addDays(d, 1)) out.push(d);
   return out;
 };
-
 const diffDays = (a, b) => Math.max(0, Math.round((startOfDay(b) - startOfDay(a)) / (1000 * 60 * 60 * 24)));
 
 // ------------------------ Componentes ------------------------
@@ -88,13 +82,9 @@ function MonthCalendar({ year, month, bookedSet, checkIn, checkOut, onPick }) {
     const dim = daysInMonth(year, month);
     const start = firstWeekdayOfMonth(year, month); // 0..6 (Dom..Sáb)
     const days = [];
-    // días previos en blanco
     for (let i = 0; i < start; i++) days.push(null);
-    // días del mes
     for (let d = 1; d <= dim; d++) days.push(new Date(year, month, d));
-    // completar a múltiplo de 7
     while (days.length % 7 !== 0) days.push(null);
-    // separar en semanas
     const out = [];
     for (let i = 0; i < days.length; i += 7) out.push(days.slice(i, i + 7));
     return out;
@@ -168,43 +158,19 @@ function Calendar({ bookedDates, setBookedDates, checkIn, setCheckIn, checkOut, 
       <div className="flex items-center justify-between mb-4">
         <h2 className="text-lg font-semibold">Disponibilidad</h2>
         <div className="flex items-center gap-2">
-          <button
-            className="px-2 py-1 rounded-md border hover:bg-slate-50"
-            onClick={() => setCursor(addDays(cursor, -30))}
-          >
-            ◀ Mes anterior
-          </button>
+          <button className="px-2 py-1 rounded-md border hover:bg-slate-50" onClick={() => setCursor(addDays(cursor, -30))}>◀ Mes anterior</button>
           <div className="text-sm min-w-[140px] text-center">
             {cursor.toLocaleString("es-CL", { month: "long", year: "numeric" })}
           </div>
-          <button
-            className="px-2 py-1 rounded-md border hover:bg-slate-50"
-            onClick={() => setCursor(addDays(cursor, 30))}
-          >
-            Mes siguiente ▶
-          </button>
+          <button className="px-2 py-1 rounded-md border hover:bg-slate-50" onClick={() => setCursor(addDays(cursor, 30))}>Mes siguiente ▶</button>
         </div>
       </div>
 
       <Legend />
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
-        <MonthCalendar
-          year={year}
-          month={month}
-          bookedSet={bookedSet}
-          checkIn={checkIn}
-          checkOut={checkOut}
-          onPick={handlePick}
-        />
-        <MonthCalendar
-          year={month === 11 ? year + 1 : year}
-          month={(month + 1) % 12}
-          bookedSet={bookedSet}
-          checkIn={checkIn}
-          checkOut={checkOut}
-          onPick={handlePick}
-        />
+        <MonthCalendar year={year} month={month} bookedSet={bookedSet} checkIn={checkIn} checkOut={checkOut} onPick={handlePick} />
+        <MonthCalendar year={month === 11 ? year + 1 : year} month={(month + 1) % 12} bookedSet={bookedSet} checkIn={checkIn} checkOut={checkOut} onPick={handlePick} />
       </div>
     </section>
   );
@@ -238,24 +204,16 @@ function BookingForm({ checkIn, checkOut, bookedDates, setBookedDates }) {
     const code = `R-${new Date().getFullYear()}-${Math.floor(Math.random() * 9000 + 1000)}`;
 
     const booking = {
-      code,
-      name,
-      email,
-      phone,
+      code, name, email, phone,
       checkIn: toKey(checkIn),
       checkOut: toKey(checkOut),
-      nights,
-      price: Number(price),
-      total,
-      notes,
+      nights, price: Number(price), total, notes,
       createdAt: new Date().toISOString(),
     };
 
-    // Guardar en localStorage
     const prev = JSON.parse(localStorage.getItem("bookings") || "[]");
     localStorage.setItem("bookings", JSON.stringify([...prev, booking]));
 
-    // Bloquear fechas en "inventario único" local
     const newBooked = Array.from(new Set([...bookedDates, ...rangeKeys]));
     localStorage.setItem("bookedDates", JSON.stringify(newBooked));
     setBookedDates(newBooked);
@@ -280,10 +238,8 @@ function BookingForm({ checkIn, checkOut, bookedDates, setBookedDates }) {
         <div className="grid gap-3">
           <label className="text-sm">Nombre completo</label>
           <input className="px-3 py-2 border rounded-xl" value={name} onChange={(e) => setName(e.target.value)} placeholder="Ej: Juan Pérez" />
-
           <label className="text-sm">Correo electrónico</label>
           <input className="px-3 py-2 border rounded-xl" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="cliente@email.cl" />
-
           <label className="text-sm">Teléfono</label>
           <input className="px-3 py-2 border rounded-xl" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="+56 9 ..." />
         </div>
@@ -291,18 +247,12 @@ function BookingForm({ checkIn, checkOut, bookedDates, setBookedDates }) {
         <div className="grid gap-3">
           <label className="text-sm">Precio por noche (ADR)</label>
           <input type="number" className="px-3 py-2 border rounded-xl" value={price} onChange={(e) => setPrice(e.target.value)} />
-
           <label className="text-sm">Notas</label>
           <textarea className="px-3 py-2 border rounded-xl" rows={4} value={notes} onChange={(e) => setNotes(e.target.value)} placeholder="Necesidades especiales, hora estimada de llegada, etc." />
-
           {hasConflict ? (
-            <div className="text-sm text-rose-700 bg-rose-50 border border-rose-200 rounded-xl px-3 py-2">
-              El rango seleccionado contiene fechas ya reservadas.
-            </div>
+            <div className="text-sm text-rose-700 bg-rose-50 border border-rose-200 rounded-xl px-3 py-2">El rango seleccionado contiene fechas ya reservadas.</div>
           ) : (
-            <div className="text-sm text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-xl px-3 py-2">
-              Rango disponible.
-            </div>
+            <div className="text-sm text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-xl px-3 py-2">Rango disponible.</div>
           )}
         </div>
       </div>
@@ -328,14 +278,11 @@ function Tools({ setBookedDates }) {
   const onExport = () => {
     const bookings = JSON.parse(localStorage.getItem("bookings") || "[]");
     if (!bookings.length) return setExportMsg("No existen reservas para exportar.");
-    const headers = [
-      "code","name","email","phone","checkIn","checkOut","nights","price","total","notes","createdAt"
-    ];
+    const headers = ["code","name","email","phone","checkIn","checkOut","nights","price","total","notes","createdAt"];
     const rows = bookings.map((b) => headers.map((h) => (b[h] ?? "")).toString());
     const csv = [headers.toString(), ...rows].join("\n");
     const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
     const url = URL.createObjectURL(blob);
-
     const a = document.createElement("a");
     a.href = url;
     a.download = `reservas_${new Date().toISOString().slice(0,10)}.csv`;
@@ -375,17 +322,14 @@ function Footer() {
   );
 }
 
-export default function App() {
+function App() {
   const [bookedDates, setBookedDates] = useState([]); // array de YYYY-MM-DD
   const [checkIn, setCheckIn] = useState(null);
   const [checkOut, setCheckOut] = useState(null);
 
   useEffect(() => {
-    // Cargar desde localStorage
     const b = JSON.parse(localStorage.getItem("bookedDates") || "[]");
     setBookedDates(b);
-
-    // Pre-reservas de ejemplo para mostrar el concepto de "inventario único"
     if (!b.length) {
       const today = startOfDay(new Date());
       const demoStart = addDays(today, 10);
@@ -396,12 +340,9 @@ export default function App() {
     }
   }, []);
 
-  const nights = useMemo(() => (checkIn && checkOut ? diffDays(checkIn, checkOut) : 0), [checkIn, checkOut]);
-
   return (
     <div className="min-h-screen bg-slate-50">
       <Header />
-
       <main className="max-w-6xl mx-auto px-6 py-8 grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2 space-y-6">
           <Calendar
@@ -413,7 +354,6 @@ export default function App() {
             setCheckOut={setCheckOut}
           />
         </div>
-
         <div className="space-y-6">
           <BookingForm
             checkIn={checkIn}
@@ -424,8 +364,11 @@ export default function App() {
           <Tools setBookedDates={setBookedDates} />
         </div>
       </main>
-
       <Footer />
     </div>
   );
 }
+
+// Montar la app en #root
+const root = ReactDOM.createRoot(document.getElementById("root"));
+root.render(<App />);
